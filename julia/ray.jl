@@ -85,6 +85,6 @@ scene = create(level, SVector(0., -1., 4.), 1)
 
 function main(;n=n,scene=scene,io=stdout)
     Printf.@printf(io,"P5\n%d %d\n255", n, n)
-    write(io, image(n))
+    write(io, image(n,scene))
 end
 main()
