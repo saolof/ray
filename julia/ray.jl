@@ -56,7 +56,6 @@ function create(level, c, r)
 end
 
 const level = 9
-const n = 16
 
 const scene = create(level, SVector{3,Float64}(0.0, -1.0, 4.0), 1)
 
@@ -90,4 +89,5 @@ function main(n)
     end
 end
 
+n = 16
 main(n)
