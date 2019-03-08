@@ -2,27 +2,21 @@
 // http://www.ffconsultancy.com/languages/ray_tracer/benchmark.html
 
 import Printf
+import LinearAlgebra: dot
+using StaticArrays: SVector
 
 struct Hit
     l ::Float64
-    d ::Array{Float64, 1}
+    d ::SVector{3,Float64}
 end
 
 struct Scene
-    c ::Array{Float64, 1}
+    c ::SVector{3,Float64}
     r ::Float64
     ss ::Array{Scene, 1}
 end
 
-function dot(u, v)
-    d = 0
-    for i in 1:size(u, 1)
-        d = d + u[i] * v[i]
-    end
-    return d
-end
-
-unitise(u) = 1/sqrt(dot(u, u)) * u
+unitise(u) = u / sqrt(dot(u, u))
 
 function inter(o, d, hit, s)
     v = s.c - o
@@ -46,8 +40,8 @@ function inter(o, d, hit, s)
     end
 end
 
-light = unitise([1, 3, -2])
-ss = 4
+const light = unitise(SVector(1., 3., -2.))
+const ss = 4
 
 function create(level, c, r)
     obj = Scene(c, r, [])
@@ -55,18 +49,17 @@ function create(level, c, r)
         return obj
     else
         a = 3*r/sqrt(12)
-        aux(x, z) = create(level-1, c + [x, a, z], r/2)
+        aux(x, z) = create(level-1, c + SVector(x, a, z), r/2)
         Scene(c, 3*r, [obj, aux(-a, -a), aux(a, -a), aux(-a, a), aux(a, a)])
     end
 end
 
-level = 9
-n = 512
+const level = 9
 
-scene = create(level, [0, -1, 4], 1)
+const scene = create(level, SVector(0., -1., 4.), 1)
 
-zero3 = [0., 0., 0.]
-hit0 = Hit(Inf, zero3)
+const zero3 = SVector(0., 0., 0.)
+const hit0 = Hit(Inf, zero3)
 
 function raytrace(dir)
     hit = inter(zero3, dir, hit0, scene)
@@ -79,16 +72,21 @@ function raytrace(dir)
     end
 end
 
-aux(x, d) = x - n/2 + d/ss
+aux(x,n,d) = x - n/2 + d/ss
 
-Printf.@printf("P5\n%d %d\n255", n, n)
-for y in n-1:-1:0
-    for x in 0:n-1
-        g = 0
-        for d in 0:ss^2-1
-            g = g + raytrace(unitise([aux(x, d%ss), aux(y, d/ss), convert(Float64, n)]))
+function main(n)
+    Printf.@printf("P5\n%d %d\n255", n, n)
+    for y in n-1:-1:0
+        for x in 0:n-1
+            g = 0
+            for d in 0:ss^2-1
+                g = g + raytrace(unitise(SVector(aux(x, n, d%ss), aux(y,n , d/ss), convert(Float64, n))))
+            end
+            g = round(255*g/ss^2)
+            write(stdout, (isnan(g) ? 0x00 : convert(UInt8, g)))
         end
-        g = round(255*g/ss^2)
-        write(stdout, (isnan(g) ? 0x00 : convert(UInt8, g)))
     end
 end
+
+n = 16
+main(n)
