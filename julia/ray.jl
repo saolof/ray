@@ -54,14 +54,10 @@ function create(level, c, r)
     end
 end
 
-const level = 9
-
-const scene = create(level, SVector(0., -1., 4.), 1)
-
 const zero3 = SVector(0., 0., 0.)
 const hit0 = Hit(Inf, zero3)
 
-function raytrace(dir)
+function raytrace(dir,scene)
     hit = inter(zero3, dir, hit0, scene)
     g = dot(hit.d, light)
     if g < 0.
@@ -73,20 +69,22 @@ function raytrace(dir)
 end
 
 aux(x,n,d) = x - n/2 + d/ss
-
-function main(n)
-    Printf.@printf("P5\n%d %d\n255", n, n)
-    for y in n-1:-1:0
-        for x in 0:n-1
-            g = 0
-            for d in 0:ss^2-1
-                g = g + raytrace(unitise(SVector(aux(x, n, d%ss), aux(y,n , d/ss), convert(Float64, n))))
-            end
-            g = round(255*g/ss^2)
-            write(stdout, (isnan(g) ? 0x00 : convert(UInt8, g)))
-        end
+function antialiasedraytrace(x,y,n,scene)
+    g = 0.
+    for d in 0:ss^2-1
+        g += raytrace(unitise(SVector(aux(x, n, d%ss), aux(y,n , d/ss), convert(Float64, n))),scene)
     end
+    g = round(255*g/ss^2)
+    (isnan(g) ? 0x00 : convert(UInt8, g))
 end
+image(n,scene) = UInt8[antialiasedraytrace(x,y,n,scene) for x in 0:n-1 for y in n-1:-1:0]
 
-n = 16
-main(n)
+n = 512
+level = 6
+scene = create(level, SVector(0., -1., 4.), 1)
+
+function main(;n=n,scene=scene,io=stdout)
+    Printf.@printf(io,"P5\n%d %d\n255", n, n)
+    write(io, image(n))
+end
+main()
