@@ -3,7 +3,7 @@
 
 import Printf
 import LinearAlgebra: dot
-using StaticArrays: SVector
+import StaticArrays: SVector
 
 struct Hit
     l ::Float64
