@@ -104,12 +104,10 @@ main()
 
 
 # For repl testing:
-# n = 512
-# level = 9
-# scene = create(level, Vec(0., -1., 4.), 1.)
-# light = unitise(Vec(-1., -3., 2.))
-# source = Vec(0.,0.,0.)
-
 # import ImageView
 # imagematrix(n,light,scene,source) = reshape(image(n,light,scene,source),(n,n))
-# ImageView.imshow(imagematrix(n,light,scene,source))
+# function viewRaytracedImage(;n=512,level=9,light=unitise(Vec(-1., -3., 2.)),source=zero3)
+#     scene = create(level, Vec(0., -1., 4.), 1.)
+#     ImageView.imshow(imagematrix(n,light,scene,source))
+# end
+# viewRaytracedImage()
