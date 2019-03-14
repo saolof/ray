@@ -16,7 +16,6 @@ end
 struct Ray
     orig :: Vec
     dir  :: Vec
-    Ray(o,d) = new(o,unitise(d))
 end
 
 struct Sphere
