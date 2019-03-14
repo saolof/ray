@@ -57,13 +57,15 @@ end
 
 const zero3 = Vec(0.,0.,0.)
 const hit0 = Hit(Inf,zero3)
+const δ = sqrt(eps())
+
 
 function raytrace(light :: Vec, ray :: Ray, scene::Union{Sphere,Group}) :: Float64
     hit = inter(scene,hit0,ray)
     if hit.l == Inf return 0. end
     g = dot(hit.d,light)
     if g >= 0.  return 0. end
-    p = ray.orig + hit.l*ray.dir + eps()*hit.d
+    p = ray.orig + hit.l*ray.dir + δ*hit.d
     hit2 = hit0
     hit2 = inter(scene,hit2,Ray(p,-light))
     return hit2.l < Inf ? 0. : -g
